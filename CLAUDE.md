@@ -14,7 +14,9 @@ A minimal implementation of a local MCP orchestrator that coordinates multiple C
 
 ## Development rules
 
-- Write commit messages in English.
+- Write commit messages in English, following [Conventional Commits](https://www.conventionalcommits.org/). semantic-release derives the next version from them: `fix:` → patch, `feat:` → minor, `BREAKING CHANGE:` footer or `!` → major. Other types (`docs:`, `ci:`, `chore:`, `test:`, `refactor:`) do not release.
+- Releases run from `.github/workflows/release.yml` on every push to `main` (npm trusted publishing, no token). Do not bump `version` in `package.json` by hand.
+- After changing any `uses:` in a workflow, run `gh actions-lock` and commit `.github/workflows/actions.lock`.
 
 ## File layout
 
