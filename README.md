@@ -105,3 +105,7 @@ npm test
 ```
 
 Creates temporary repositories and worktrees, and checks end to end with clients for multiple sessions: joining, rejecting duplicate registration, isolation between projects, waits, cycle detection, completion notices, fetching diffs, takeover, leaving, joining from worktrees, and hooks.
+
+## License
+
+[MIT](LICENSE)
