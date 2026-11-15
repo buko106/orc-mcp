@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "orc": {
+      "type": "http",
+      "url": "http://127.0.0.1:4700/mcp",
+      "headers": {
+        "Authorization": "Bearer ${ORC_TOKEN}"
+      }
+    }
+  }
+}
