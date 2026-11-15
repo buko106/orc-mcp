@@ -4,6 +4,7 @@
   "description": "Local MCP orchestrator that coordinates multiple Claude Code sessions (one repo each)",
   "type": "module",
   "private": true,
+  "license": "MIT",
   "engines": {
     "node": ">=22.13"
   },
