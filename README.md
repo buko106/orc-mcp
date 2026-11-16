@@ -1,5 +1,7 @@
 # orc-mcp
 
+[![npm version](https://img.shields.io/npm/v/orc-mcp.svg)](https://www.npmjs.com/package/orc-mcp)
+
 A local-only MCP orchestrator that coordinates multiple Claude Code sessions (one session = one repository).
 
 The orchestrator itself is a resident program with no LLM inside. It has three jobs:
