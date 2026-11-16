@@ -39,7 +39,7 @@ A minimal implementation of a local MCP orchestrator that coordinates multiple C
 
 ## Not yet verified
 
-- Connecting from a real Claude Code. Check the `mcp.json.example` format (`type: "http"`, `headers`, expansion of `${ORC_TOKEN}`) against the current docs.
+- Connecting from a real Claude Code. README's primary setup is user scope (`claude mcp add-json --scope user` + hooks in `~/.claude/settings.json`). The docs confirm `${VAR}` expansion in `headers` for `.mcp.json`; whether `${ORC_TOKEN}` is also expanded for a user-scope entry in `~/.claude.json` is not confirmed.
 - How Claude Code handles `Mcp-Session-Id`. In particular, verify on a real setup whether it automatically reinitializes after getting a 404 following a server restart, and whether the connection ID changes when Claude Code restarts or a conversation is resumed. If it changes, `force: true` is needed while the previous connection is still "live" (120 seconds by default).
 - Claude Code's MCP tool call timeout. Check that the 110-second cap on `wait_for` fits; if not, lower the cap or extend the timeout setting.
 - Hook behavior on a real setup. In particular: (1) whether `asyncRewake` works on the Stop event, (2) whether an idle session is actually woken by exit code 2, (3) whether the same holds for sessions via remote-control, (4) whether `cwd` in the hook input is the worktree path. If `asyncRewake` does not work on Stop, the alternatives are a synchronous Stop hook returning `decision: "block"` (watch the limit on consecutive blocks) or an `mcp_tool`-type hook.

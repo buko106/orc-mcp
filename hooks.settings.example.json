@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node /ABSOLUTE/PATH/TO/orc-mcp/dist/src/hook.js session-start",
+            "command": "orc-mcp-hook session-start",
             "timeout": 10
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node /ABSOLUTE/PATH/TO/orc-mcp/dist/src/hook.js stop-wait",
+            "command": "orc-mcp-hook stop-wait",
             "asyncRewake": true
           }
         ]

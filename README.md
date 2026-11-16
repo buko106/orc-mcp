@@ -15,25 +15,49 @@ The orchestrator itself is a resident program with no LLM inside. It has three j
 - Node.js 22.13 or later (uses the built-in `node:sqlite`; on 22.x it prints an experimental-feature warning)
 - git
 
-## Starting
+## Setup
 
-```sh
-npm install
-npm run build
-ORC_TOKEN=$(openssl rand -hex 16) npm start
-```
+Set up once for your user; every repository and worktree then works without per-repository files. The package installs two commands: `orc-mcp` (the orchestrator) and `orc-mcp-hook` (run by Claude Code hooks).
+
+1. Install:
+
+   ```sh
+   npm install -g orc-mcp
+   ```
+
+2. Pick a token and export it from your shell profile (e.g. `~/.zshrc`), so both the orchestrator and Claude Code see it:
+
+   ```sh
+   export ORC_TOKEN=<output of: openssl rand -hex 16>
+   ```
+
+3. Register the MCP server for your user. Keep the single quotes so `${ORC_TOKEN}` is stored as-is and expanded by Claude Code at connect time:
+
+   ```sh
+   claude mcp add-json --scope user orc '{"type":"http","url":"http://127.0.0.1:4700/mcp","headers":{"Authorization":"Bearer ${ORC_TOKEN}"}}'
+   ```
+
+4. Add the hooks from [`hooks.settings.example.json`](hooks.settings.example.json) to `~/.claude/settings.json` (merge into an existing `"hooks"` key if you have one). See [Hooks](#hooks-enforcing-waits-and-guiding-reconnection) for what they do.
+
+5. Start the orchestrator and leave it running:
+
+   ```sh
+   orc-mcp
+   ```
 
 | Environment variable | Default | Description |
 |---|---|---|
-| `ORC_PORT` | `4700` | Listening port (always bound to `127.0.0.1`) |
+| `ORC_PORT` | `4700` | Listening port (always bound to `127.0.0.1`). If you change it, change the URL in step 3 too |
 | `ORC_DB` | `~/.orc-mcp/orc.db` | SQLite file |
 | `ORC_TOKEN` | none | When set, `Authorization: Bearer` is required |
 | `ORC_STALE_SEC` | `1800` | A session that has not called in for longer than this is considered stalled |
 | `ORC_TAKEOVER_SEC` | `120` | A connection used within this many seconds is considered "live", and joining under the same name is rejected |
 
-## Connecting from each repository
+With user scope, sessions outside any project also see the `orc` tools, and when the orchestrator is running the SessionStart hook adds one line to their context saying the orchestrator is available. If the orchestrator is not running, Claude Code shows the `orc` server as failed to connect; the hooks do nothing.
 
-Copy `mcp.json.example` to `.mcp.json` in each repository. The content can be the same for every repository (session names are not written in the config file).
+### Per-repository setup instead
+
+To enable orc-mcp only in specific repositories, use project scope: copy [`mcp.json.example`](mcp.json.example) to `.mcp.json` and put the hooks in `.claude/settings.json` in each repository. Commit both, or worktrees created for new sessions won't have them. Claude Code asks you to approve a project's MCP server the first time it is used.
 
 ## Joining a project
 
@@ -91,7 +115,7 @@ Rejoining with the same project name, name, and repository is treated as a recon
 
 ## Hooks (enforcing waits and guiding reconnection)
 
-Calling `wait_for` again is only a request to the model, so Claude Code hooks reinforce it. After `npm run build`, put the contents of `hooks.settings.example.json` into each repository's `.claude/settings.json` (or `~/.claude/settings.json`) and rewrite the paths. Set `ORC_PORT` and `ORC_TOKEN` in the environment Claude Code is started from.
+Calling `wait_for` again is only a request to the model, so Claude Code hooks reinforce it. The hooks run `orc-mcp-hook`, configured in [Setup](#setup) step 4. They read `ORC_PORT` and `ORC_TOKEN` from the environment Claude Code is started from.
 
 | Hook | Behavior |
 |---|---|
@@ -100,13 +124,20 @@ Calling `wait_for` again is only a request to the model, so Claude Code hooks re
 
 Hooks identify the session from the working directory (worktree). If the orchestrator is not running, they do nothing.
 
-## Tests
+## Development
+
+Run from a clone instead of the npm package:
 
 ```sh
+npm install
+npm run build
+npm start          # same as orc-mcp
 npm test
 ```
 
-Creates temporary repositories and worktrees, and checks end to end with clients for multiple sessions: joining, rejecting duplicate registration, isolation between projects, waits, cycle detection, completion notices, fetching diffs, takeover, leaving, joining from worktrees, and hooks.
+To use a local build with the hooks, replace `orc-mcp-hook` in the hook commands with `node /ABSOLUTE/PATH/TO/orc-mcp/dist/src/hook.js`.
+
+`npm test` creates temporary repositories and worktrees, and checks end to end with clients for multiple sessions: joining, rejecting duplicate registration, isolation between projects, waits, cycle detection, completion notices, fetching diffs, takeover, leaving, joining from worktrees, and hooks.
 
 ## License
 
